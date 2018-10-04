@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo/middleware"
 )
 
+// ScriptRunner struct for  run script
 type ScriptRunner struct {
 }
 
