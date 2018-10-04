@@ -13,3 +13,9 @@
 
 # Vendor dependencies
 /vendor
+
+# Ignore binary file
+main
+
+# Ignore IDE files
+.vscode/
