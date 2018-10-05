@@ -1,39 +1,38 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"os"
-	"os/exec"
 
 	"github.com/gogetth/webgook/api"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
 
-// ScriptRunner struct for  run script
-type ScriptRunner struct {
-}
-
 func main() {
 	e := echo.New()
 
-	api := &api.API{
-		ScriptRunner: &ScriptRunner{},
+	// read flag from command line
+	ip := flag.String("ip", "", "Specify ip address if you want")
+	port := flag.String("port", "9000", "Specify port (default: 9000)")
+	scriptPath := flag.String("script", "", "You must specify script")
+	secretKey := flag.String("key", "super-secret-key", "Specify secret key by this flag or else `super-secret -key` by default")
+
+	flag.Parse()
+	serverString := fmt.Sprintf("%s:%s", *ip, *port)
+
+	passingParameter := api.Parameter{
+		ScriptPath: *scriptPath,
+		SecretKey:  *secretKey,
 	}
+
+	api := &api.API{
+		ScriptRunner: &api.ScriptRunner{},
+		Parameter:    passingParameter,
+	}
+
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.GET("/webhook", api.Webhook)
-	e.Logger.Fatal(e.Start(":9000"))
-}
-
-// RunScript for starting shellÎ
-func (s ScriptRunner) RunScript(scriptPath string) error {
-	cmd := exec.Command(scriptPath)
-
-	err := cmd.Start()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "Error starting script", err)
-		os.Exit(1)
-	}
-	return err
+	e.Logger.Fatal(e.Start(serverString))
 }
