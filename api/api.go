@@ -10,6 +10,12 @@ import (
 	"github.com/labstack/echo"
 )
 
+// Parameter is struct that we use to pass parameter from command line
+type Parameter struct {
+	ScriptPath string
+	SecretKey  string
+}
+
 // ScriptRunner struct for  run script
 type ScriptRunner struct {
 }
@@ -18,26 +24,36 @@ type ScriptRunner struct {
 type Methods interface {
 	RunScript(scriptPath string) error
 	CheckScriptPath(scriptPath string) (string, error)
+	VerifySecretKey(secretKeyFromCommandLine, secretKey string) (bool, error)
 }
 
 // API use to expose object
 type API struct {
 	ScriptRunner Methods
-	ScriptPath   string
+	Parameter    Parameter
 }
 
 // Webhook method use for serve webhook
 func (api *API) Webhook(c echo.Context) error {
-	scriptPath, err := api.ScriptRunner.CheckScriptPath(api.ScriptPath)
+	secretKeyFromHook := c.QueryParam("key")
+
+	virified, err := api.ScriptRunner.VerifySecretKey(api.Parameter.SecretKey, secretKeyFromHook)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": err.Error(),
-		})
+		return responseInternalServerError(c, err)
+	}
+
+	if !virified {
+		return responseInternalServerError(c, errors.New("failed to verify secret key"))
+	}
+
+	scriptPath, err := api.ScriptRunner.CheckScriptPath(api.Parameter.ScriptPath)
+	if err != nil {
+		return responseInternalServerError(c, err)
 	}
 
 	err = api.ScriptRunner.RunScript(scriptPath)
 	if err != nil {
-		return err
+		return responseInternalServerError(c, err)
 	}
 
 	return c.JSON(http.StatusOK, map[string]string{
@@ -73,4 +89,18 @@ func (s ScriptRunner) CheckScriptPath(scriptPath string) (string, error) {
 	}
 
 	return scriptPath, nil
+}
+
+// VerifySecretKey use to verify hooking is legal
+func (s ScriptRunner) VerifySecretKey(secretKeyFromCommandLine, secretKey string) (bool, error) {
+	if secretKeyFromCommandLine == secretKey {
+		return true, nil
+	}
+	return false, errors.New("secret key does not valid")
+}
+
+func responseInternalServerError(c echo.Context, err error) error {
+	return c.JSON(http.StatusInternalServerError, map[string]string{
+		"error": err.Error(),
+	})
 }

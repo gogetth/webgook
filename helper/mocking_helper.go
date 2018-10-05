@@ -13,3 +13,8 @@ func (s ScriptRunnerMockup) CheckScriptPath(scriptPath string) (string, error) {
 func (s ScriptRunnerMockup) RunScript(scriptPath string) error {
 	return nil
 }
+
+// VerifySecretKey method for mocking verification to true
+func (s ScriptRunnerMockup) VerifySecretKey(secretKeyFromCommandLine, secretKey string) (bool, error) {
+	return true, nil
+}
