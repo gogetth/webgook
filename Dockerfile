@@ -8,9 +8,9 @@ WORKDIR $GOPATH/src/github.com/gogetth/webgook
 COPY Gopkg.toml Gopkg.lock ./
 RUN dep ensure --vendor-only
 COPY . ./
-RUN go build -o /main .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /webhook .
 
 # Run inside anothor one container
-FROM golang:1.11
-COPY --from=builder /main ./
-ENTRYPOINT ["./main"]
+FROM docker:latest
+COPY --from=builder /webhook ./
+ENTRYPOINT ["./webhook"]

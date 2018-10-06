@@ -7,7 +7,6 @@
 
 # Test binary, build with `go test -c`
 *.test
-test.sh
 test
 
 # Output of the go coverage tool, specifically when used with LiteIDE
@@ -21,3 +20,7 @@ main
 
 # Ignore IDE files
 .vscode/
+
+# ignore macos ds store
+.DS_Store
+

@@ -14,9 +14,9 @@ func main() {
 
 	// read flag from command line
 	ip := flag.String("ip", "", "Specify ip address if you want")
-	port := flag.String("port", "9000", "Specify port (default: 9000)")
+	port := flag.String("port", "9000", "Specify port")
 	scriptPath := flag.String("script", "", "You must specify script")
-	secretKey := flag.String("key", "super-secret-key", "Specify secret key by this flag or else `super-secret -key` by default")
+	secretKey := flag.String("key", "super-secret-key", "Specify secret key by this flag")
 
 	flag.Parse()
 	serverString := fmt.Sprintf("%s:%s", *ip, *port)
