@@ -21,3 +21,7 @@ main
 
 # Ignore IDE files
 .vscode/
+
+# ignore macos ds store
+.DS_Store
+
